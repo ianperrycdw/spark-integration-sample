@@ -27,7 +27,7 @@ var clientId = process.env.CLIENT_ID || "C4ae9568c6cf4576abbc58c183b69f466c6ea6a
 var clientSecret = process.env.CLIENT_SECRET || "772c2882806539bee681288640608f5ec2e6afbc11010e74d8bd11c941893096";
 var redirectURI = process.env.REDIRECT_URI || "http://localhost:8080/oauth"; // where your integration is waiting for Cisco Spark to redirect and send the authorization code
 var state = process.env.STATE || "CiscoDevNet"; // state can be used for security and/or correlation purposes
-var scopes = "spark:people_read"; // extend permission with Spark OAuth scopes required by your example, supported scopes are: https://developer.ciscospark.com/add-integration.html
+var scopes = "spark:rooms_read"; // extend permission with Spark OAuth scopes required by your example, supported scopes are: https://developer.ciscospark.com/add-integration.html
 
 
 //
@@ -186,10 +186,10 @@ function oauthFlowCompleted(access_token, res) {
     // Custom logic below
     //
 
-    // Retreive user name: GET https://api.ciscospark.com/v1/people/me
+    // Retrieve list of rooms: GET https://api.ciscospark.com/v1/rooms
     var options = {
         method: 'GET',
-        url: 'https://api.ciscospark.com/v1/people/me',
+        url: 'https://api.ciscospark.com/v1/rooms',
         headers:
         {
             "authorization": "Bearer " + access_token
@@ -221,7 +221,7 @@ function oauthFlowCompleted(access_token, res) {
         //      "created": "2016-02-04T15:46:20.321Z"
         //    }
         var json = JSON.parse(body);
-        if ((!json) || (!json.displayName)) {
+        if ((!json) || (!json.title)) {
             debug("could not parse Person details: bad json payload or could not find a displayName.");
             res.send("<h1>OAuth Integration could not complete</h1><p>Sorry, could not retreive your Cisco Spark account details. Try again...</p>");
             return;
@@ -230,8 +230,8 @@ function oauthFlowCompleted(access_token, res) {
         // Uncomment to send feedback via static HTML code 
         //res.send("<h1>OAuth Integration example for Cisco Spark (static HTML)</h1><p>So happy to meet, " + json.displayName + " !</p>");
         // OR leverage an EJS template
-        var str = read(join(__dirname, '/www/display-name.ejs'), 'utf8');
-        var compiled = ejs.compile(str)({ "displayName": json.displayName });
+        var str = read(join(__dirname, '/www/list-rooms.ejs'), 'utf8');
+        var compiled = ejs.compile(str)({ "title": json.title });
         res.send(compiled);
     });
 }
